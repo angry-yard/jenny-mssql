@@ -1,0 +1,9 @@
+# Created by .ignore support plugin (hsz.mobi)
+*.js
+*.js.map
+
+# Ignore dist folder
+dist/
+
+# Ignore node modules
+node_modules/
