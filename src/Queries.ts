@@ -4,7 +4,7 @@
         var excludedWhere = "";
 
         if (includedTables) {
-            includedWhere = ` t.name in ('${includedTables.join("','")}')`;
+            includedWhere = ` and t.name in ('${includedTables.join("','")}')`;
         }
 
         if (excludedTables) {
@@ -13,24 +13,7 @@
             excludedWhere = ` ${subSql} t.name not in ('${excludedTables.join("','")}')`;
         }
 
-        return `SELECT SCHEMA_NAME(t.schema_id) AS table_schema,
-            t.name as table_name,
-            t.object_id as table_id,
-            c.name as column_name, 
-            c.column_id,
-            c.max_length,
-            c.precision,
-            c.scale,
-            c.is_nullable,
-            c.is_rowguidcol,
-            c.is_identity,
-            c.is_computed,
-            ty.name as data_type
-        FROM sys.tables t
-        INNER JOIN sys.columns c ON c.object_id = t.object_id
-        INNER JOIN sys.types ty on ty.system_type_id = c.system_type_id
-        WHERE ty.name <> 'sysname' and ${includedWhere}${excludedWhere}
-        order by t.name, c.column_id`;
+        return `SELECT SCHEMA_NAME(t.schema_id) AS table_schema, t.name as table_name, t.object_id as table_id, c.name as column_name, c.column_id, c.max_length, c.precision, c.scale, c.is_nullable, c.is_rowguidcol, c.is_identity, c.is_computed, ty.name as data_type FROM sys.tables t INNER JOIN sys.columns c ON c.object_id = t.object_id INNER JOIN sys.types ty on ty.system_type_id = c.system_type_id WHERE ty.name <> 'sysname' ${includedWhere}${excludedWhere} order by t.name, c.column_id`;
     };
 
     static getForeignKeys = (objectId: number): string => {

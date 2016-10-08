@@ -1,7 +1,8 @@
 {
   "name": "jenny-mssql",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "SQL Server driver for jenny",
+  "main": "DatabaseService.js",
   "author": {
     "name": "Ryan Grady",
     "email": "ryan@angry-yard.com"
@@ -20,11 +21,11 @@
     "copyFiles": "copy README.md dist && copy package.json dist",
     "clearDist": "del dist\\*.* /s /q",
     "publish": "npm publish dist",
-    "compile": "tsc --module amd --moduleResolution node --outFile dist/jenny-mssql.js --declaration --listFiles --skipLibCheck"
+    "compile": "tsc --module commonjs --outDir dist --declaration --listFiles --skipLibCheck"
   },
   "dependencies": {
     "bluebird": "^3.4.6",
-    "jenny-database": "^0.6.0",
+    "jenny-database": "^0.8.0",
     "mssql": "^2.3.1",
     "readable-stream": "^2.0.2",
     "tedious": "^1.12.3",

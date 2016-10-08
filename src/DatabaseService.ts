@@ -1,12 +1,16 @@
 ﻿import * as sql from "mssql";
 import * as Promise from "bluebird";
 import * as _ from "underscore";
-import {IDatabaseService, Table, Column, IForeignKeyResponse, ITableResponse, IPrimaryKeyColumn, IPrimaryKeyResponse} from "jenny-database";
+import {IDatabaseService} from "jenny-database/interfaces/IDatabaseService";
+import {IForeignKeyResponse} from "jenny-database/interfaces/IForeignKeyResponse";
+import {ITableResponse} from "jenny-database/interfaces/ITableResponse";
+import {IPrimaryKeyResponse} from "jenny-database/interfaces/IPrimaryKeyResponse";
+import {Table} from "jenny-database/Table";
+import {Column} from "jenny-database/Column";
 import {Queries} from "./Queries";
 
 export class DatabaseService implements IDatabaseService {
     private sqlConfig: sql.config;
-
 
     constructor(user: string, password: string, server: string, database: string, private includedTables?: string[], private excludedTables?: string[]) {
         this.sqlConfig = {
@@ -24,6 +28,8 @@ export class DatabaseService implements IDatabaseService {
         connection
             .connect()
             .then(() => {
+                console.log(`Connected to database - ${this.sqlConfig.database}`);
+
                 this.createTables(connection)
                     .then((tables: Table[]) => {
                         Promise
@@ -36,6 +42,11 @@ export class DatabaseService implements IDatabaseService {
                                 console.log(error);
                             })
                     });
+            })
+            .catch((error: sql.ConnectionError) => {
+                console.log("Error connecting to the database");
+                console.log(error.message);
+                process.exit();
             });
 
         return deferredResult.promise;
@@ -54,7 +65,9 @@ export class DatabaseService implements IDatabaseService {
 
                 _.each(recordset, (record: ITableResponse) => {
                     if (tableId !== record.table_id) {
-                        // Table has already been created
+                        // Table needs to be created
+                        console.log(`Building table - ${record.table_name}`);
+
                         table = new Table(record);
                         tables.push(table);
 
@@ -69,7 +82,9 @@ export class DatabaseService implements IDatabaseService {
                 deferredResult.resolve(tables);
             })
             .catch((error: sql.RequestError) => {
-                console.log(error);
+                console.log("Error creating tables");
+                console.log(error.message);
+                process.exit();
             });
 
         return deferredResult.promise;
@@ -102,6 +117,11 @@ export class DatabaseService implements IDatabaseService {
                     if (tableCount === tables.length) {
                         deferredResult.resolve();
                     }
+                })
+                .catch((error: sql.RequestError) => {
+                    console.log("Error getting primary keys");
+                    console.log(error.message);
+                    process.exit();
                 });
         });
 
@@ -145,8 +165,10 @@ export class DatabaseService implements IDatabaseService {
                         deferredResult.resolve();
                     }
                 })
-                .catch((error: any) => {
-                    console.log(error);
+                .catch((error: sql.RequestError) => {
+                    console.log("Error getting foreign keys");
+                    console.log(error.message);
+                    process.exit();
                 });
         });
 
